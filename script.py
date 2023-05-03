@@ -21,13 +21,12 @@ except MySQLError as e:
 # Create cursor
 mycursor = mydb.cursor()
 
-# Get all license numbers and statuses from license_numbers_table where player_status = 1
-mycursor.execute("SELECT license_number, player_status FROM license_numbers_table WHERE player_status = 1")
-license_numbers_table_data = mycursor.fetchall()
+# Get license numbers and their corresponding table names where player_status = 1
+mycursor.execute("SELECT license_number, 'license_numbers_table' as table_name FROM license_numbers_table WHERE player_status = 1 UNION SELECT license_number, 'retired_license_table' as table_name FROM retired_license_table WHERE player_status = 1")
+license_numbers_data = mycursor.fetchall()
 
-# Get all license numbers and statuses from retired_license_table where player_status = 1
-mycursor.execute("SELECT license_number, player_status FROM retired_license_table WHERE player_status = 1")
-retired_license_table_data = mycursor.fetchall()
+# Prefix the license numbers with A or B depending on which table they come from
+prefixed_license_numbers = [('A' + str(row[0]) if row[1] == 'license_numbers_table' else 'B' + str(row[0])) for row in license_numbers_data]
 
 # Get Google Sheets credentials and connect to sheet
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
@@ -38,13 +37,20 @@ sheet = client.open('MySQL Test Table').sheet1
 # Get all license numbers from the Google Sheet
 sheet_license_numbers = [row[0] for row in sheet.get_all_values()][1:]
 
+# Prefix the license numbers in the Google Sheet with A or B if they are not already prefixed
+prefixed_sheet_license_numbers = []
+for license_number in sheet_license_numbers:
+    if license_number[0] == 'A' or license_number[0] == 'B':
+        prefixed_sheet_license_numbers.append(license_number)
+    else:
+        prefixed_sheet_license_numbers.append('A' + license_number)
+
 # Create sets of the license numbers from each source
-license_numbers_table = set(['A' + str(row[0]).zfill(8) for row in license_numbers_table_data if row[1] == 1])
-retired_license_table = set(['B' + str(row[0]).zfill(8) for row in retired_license_table_data if row[1] == 1])
-sheet_license_numbers = set(['B' + str(row).zfill(8) for row in sheet_license_numbers])
+license_numbers_table = set(prefixed_license_numbers)
+sheet_license_numbers = set(prefixed_sheet_license_numbers)
 
 # Find any license numbers that are not in at least one of the sources
-missing_license_numbers = sheet_license_numbers - (license_numbers_table | retired_license_table)
+missing_license_numbers = sheet_license_numbers - license_numbers_table
 
 # Create the message to be sent
 message = MIMEText("Missing license numbers:\n" + "\n".join(missing_license_numbers))
