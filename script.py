@@ -54,7 +54,13 @@ message['Subject'] = 'Missing License Numbers'
 message['From'] = sender
 message['To'] = recipient
 
-# Send the email using SMTP
-smtpObj = smtplib.SMTP('your_smtp_server_address')
+# Set up SMTP server and login
+smtpObj = smtplib.SMTP('smtp.gmail.com', 587, timeout=120)
+smtpObj.starttls()
+smtpObj.login('emailcaseydent@gmail.com', 'meshuggah1')
+
+# Send the email
 smtpObj.sendmail(sender, recipient, message.as_string())
+
+# Close the connection to the SMTP server
 smtpObj.quit()
