@@ -22,7 +22,7 @@ except MySQLError as e:
 mycursor = mydb.cursor()
 
 # Get all license numbers and statuses from license_numbers_table where player_status = 1
-mycursor.execute("SELECT license_number FROM license_numbers_table WHERE player_status = '1'")
+mycursor.execute("SELECT license_number, player_status FROM license_numbers_table WHERE player_status = '1'")
 license_numbers_table_data = mycursor.fetchall()
 
 # Get all license numbers and statuses from retired_license_table where player_status = 1
