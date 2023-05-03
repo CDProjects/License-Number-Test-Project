@@ -1,4 +1,5 @@
 import mysql.connector
+import config
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import smtplib
@@ -57,7 +58,7 @@ message['To'] = recipient
 # Set up SMTP server and login
 smtpObj = smtplib.SMTP('smtp.gmail.com', 587, timeout=120)
 smtpObj.starttls()
-smtpObj.login('emailcaseydent@gmail.com', )
+smtpObj.login('emailcaseydent@gmail.com', config.EMAIL_PASSWORD)
 
 # Send the email
 smtpObj.sendmail(sender, recipient, message.as_string())
