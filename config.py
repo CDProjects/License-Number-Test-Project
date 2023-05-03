@@ -1,1 +1,1 @@
-EMAIL_PASSWORD = 'meshuggah 1'
+EMAIL_PASSWORD = 'Meshuggah 1'
