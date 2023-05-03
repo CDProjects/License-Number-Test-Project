@@ -57,7 +57,7 @@ message['To'] = recipient
 # Set up SMTP server and login
 smtpObj = smtplib.SMTP('smtp.gmail.com', 587, timeout=120)
 smtpObj.starttls()
-smtpObj.login('emailcaseydent@gmail.com', 'meshuggah1')
+smtpObj.login('emailcaseydent@gmail.com', )
 
 # Send the email
 smtpObj.sendmail(sender, recipient, message.as_string())
