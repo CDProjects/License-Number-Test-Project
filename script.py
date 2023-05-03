@@ -39,8 +39,8 @@ sheet = client.open('MySQL Test Table').sheet1
 sheet_license_numbers = [row[0] for row in sheet.get_all_values()][1:]
 
 # Create sets of the license numbers from each source
-license_numbers_table = set(['A' + str(row[0]) for row in license_numbers_table_data])
-retired_license_table = set(['B' + str(row[0]) for row in retired_license_table_data])
+license_numbers_table = set(['A' + str(row[0]) for row in license_numbers_table_data if row[1] == 1])
+retired_license_table = set(['B' + str(row[0]) for row in retired_license_table_data if row[1] == 1])
 sheet_license_numbers = set(sheet_license_numbers)
 
 # Find any license numbers that are not in at least one of the sources
