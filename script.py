@@ -26,7 +26,7 @@ table2_data = mycursor.fetchall()
 
 # Get Google Sheets credentials and connect to sheet
 scope = ['https://www.googleapis.com/auth/drive']
-creds = ServiceAccountCredentials.from_json_keyfile_name('XXXXX', scope)
+creds = ServiceAccountCredentials.from_json_keyfile_name('Keys/Google Sheets API.json', scope)
 client = gspread.authorize(creds)
 sheet = client.open('MySQL Test Table').sheet1
 
