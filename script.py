@@ -22,11 +22,11 @@ except MySQLError as e:
 mycursor = mydb.cursor()
 
 # Get all license numbers and statuses from license_numbers_table where player_status = 1
-mycursor.execute("SELECT license_number, player_status FROM license_numbers_table WHERE player_status = '1'")
+mycursor.execute("SELECT license_number FROM license_numbers_table WHERE player_status = 1")
 license_numbers_table_data = mycursor.fetchall()
 
 # Get all license numbers and statuses from retired_license_table where player_status = 1
-mycursor.execute("SELECT license_number FROM retired_license_table WHERE player_status = '1'")
+mycursor.execute("SELECT license_number FROM retired_license_table WHERE player_status = 1")
 retired_license_table_data = mycursor.fetchall()
 
 # Get Google Sheets credentials and connect to sheet
@@ -39,8 +39,8 @@ sheet = client.open('MySQL Test Table').sheet1
 sheet_license_numbers = [row[0] for row in sheet.get_all_values()][1:]
 
 # Create sets of the license numbers from each source
-license_numbers_table = set(['A' + str(row[0]) for row in license_numbers_table_data if row[1] == 1])
-retired_license_table = set(['B' + str(row[0]) for row in retired_license_table_data if row[1] == 1])
+license_numbers_table = set(['A' + str(row[0]) for row in license_numbers_table_data])
+retired_license_table = set(['B' + str(row[0]) for row in retired_license_table_data])
 sheet_license_numbers = set(sheet_license_numbers)
 
 # Find any license numbers that are not in at least one of the sources
@@ -74,4 +74,3 @@ with smtplib.SMTP('smtp.gmail.com', 587, timeout=120) as smtpObj:
 
     # Close the connection to the SMTP server
     smtpObj.quit()
-
