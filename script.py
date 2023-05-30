@@ -35,7 +35,7 @@ prefixed_license_numbers_retired_table = ['B' + str(row[0]) for row in license_n
 # Get Google Sheets credentials and connect to sheet
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
 credentials = service_account.Credentials.from_service_account_file('Keys/Google Sheets API.json', scopes=scope)
-client = gspread.authorize(creds)
+client = gspread.authorize(credentials)
 sheet = client.open('MySQL Test Table').sheet1
 
 # Get all license numbers from the Google Sheet
