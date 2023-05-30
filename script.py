@@ -88,5 +88,6 @@ with smtplib.SMTP('smtp.gmail.com', 587, timeout=120) as smtpObj:
         # Send the email
         smtpObj.sendmail(sender, recipient, message.as_string())
 
-# Close the connection to the SMTP server
-smtpObj.quit()
+    # Close the connection to the SMTP server
+    smtpObj.quit()
+
