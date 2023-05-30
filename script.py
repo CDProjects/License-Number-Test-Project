@@ -49,8 +49,14 @@ sheet_license_numbers = [row[0] for row in sheet.get_all_values()][1:]
 # Compare the license numbers from MySQL with the ones in the Google Sheet
 missing_license_numbers = [license_number for license_number in sheet_license_numbers if license_number not in all_license_numbers]
 
+# Find license numbers in all_license_numbers that are not in the Google Sheet
+additional_missing_license_numbers = [license_number for license_number in all_license_numbers if license_number not in sheet_license_numbers]
+
+# Combine the missing license numbers from both sources
+all_missing_license_numbers = missing_license_numbers + additional_missing_license_numbers
+
 # Create the message to be sent
-message = MIMEText("Missing license numbers:\n" + "\n".join(missing_license_numbers))
+message = MIMEText("Missing license numbers:\n" + "\n".join(all_missing_license_numbers))
 
 # Set the sender and recipient email addresses
 sender = "emailcaseydent@gmail.com"
@@ -72,8 +78,10 @@ with smtplib.SMTP('smtp.gmail.com', 587, timeout=120) as smtpObj:
         print(f"SMTP login error: {e}")
         exit(1)
 
-    # Send the email
-    smtpObj.sendmail(sender, recipient, message.as_string())
+    # Send the email if there are missing license numbers
+    if all_missing_license_numbers:
+        # Send the email
+        smtpObj.sendmail(sender, recipient, message.as_string())
 
     # Close the connection to the SMTP server
     smtpObj.quit()
