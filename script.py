@@ -2,9 +2,8 @@ import mysql.connector
 import config
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-import smtplib
 from email.mime.text import MIMEText
-from mysql.connector.errors import Error as MySQLError
+import smtplib
 
 # Connect to MySQL database
 try:
@@ -14,19 +13,24 @@ try:
         password="DTWP8o#GpPH#Egp",
         database="test_schema"
     )
-except MySQLError as e:
+except mysql.connector.Error as e:
     print(f"Error connecting to MySQL database: {e}")
     exit(1)
 
 # Create cursor
 mycursor = mydb.cursor()
 
-# Get license numbers and their corresponding table names where player_status = 1
-mycursor.execute("SELECT license_number, 'license_numbers_table' as table_name FROM license_numbers_table WHERE player_status = 1 UNION SELECT license_number, 'retired_license_table' as table_name FROM retired_license_table WHERE player_status = 1")
-license_numbers_data = mycursor.fetchall()
+# Get license numbers and their corresponding table names where player_status = 1 from license_numbers_table
+mycursor.execute("SELECT license_number FROM license_numbers_table WHERE player_status = 1")
+license_numbers_license_table = mycursor.fetchall()
 
-# Prefix the license numbers with A or B depending on which table they come from
-prefixed_license_numbers = [('A' + str(row[0]) if row[1] == 'license_numbers_table' else 'B' + str(row[0])) for row in license_numbers_data]
+# Get license numbers and their corresponding table names where player_status = 1 from retired_license_table
+mycursor.execute("SELECT license_number FROM retired_license_table WHERE player_status = 1")
+license_numbers_retired_table = mycursor.fetchall()
+
+# Prefix the license numbers with 'A' or 'B' depending on the table they come from
+prefixed_license_numbers_license_table = ['A' + str(row[0]) for row in license_numbers_license_table]
+prefixed_license_numbers_retired_table = ['B' + str(row[0]) for row in license_numbers_retired_table]
 
 # Get Google Sheets credentials and connect to sheet
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
@@ -37,7 +41,7 @@ sheet = client.open('MySQL Test Table').sheet1
 # Get all license numbers from the Google Sheet
 sheet_license_numbers = [row[0] for row in sheet.get_all_values()][1:]
 
-# Prefix the license numbers in the Google Sheet with A or B if they are not already prefixed
+# Prefix the license numbers in the Google Sheet with 'A' or 'B' if they are not already prefixed
 prefixed_sheet_license_numbers = []
 for license_number in sheet_license_numbers:
     if license_number[0] == 'A' or license_number[0] == 'B':
@@ -46,11 +50,18 @@ for license_number in sheet_license_numbers:
         prefixed_sheet_license_numbers.append('A' + license_number)
 
 # Create sets of the license numbers from each source
-license_numbers_table = set(prefixed_license_numbers)
+license_numbers_license_table = set(prefixed_license_numbers_license_table)
+license_numbers_retired_table = set(prefixed_license_numbers_retired_table)
 sheet_license_numbers = set(prefixed_sheet_license_numbers)
 
-# Find any license numbers that are not in at least one of the sources
-missing_license_numbers = sheet_license_numbers - license_numbers_table
+# Find missing license numbers in the license_numbers_license_table
+missing_license_numbers_license_table = license_numbers_license_table - sheet_license_numbers
+
+# Find missing license numbers in the license_numbers_retired_table
+missing_license_numbers_retired_table = license_numbers_retired_table - sheet_license_numbers
+
+# Combine the missing license numbers from both tables
+missing_license_numbers = missing_license_numbers_license_table.union(missing_license_numbers_retired_table)
 
 # Create the message to be sent
 message = MIMEText("Missing license numbers:\n" + "\n".join(missing_license_numbers))
