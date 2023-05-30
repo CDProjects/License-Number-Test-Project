@@ -1,7 +1,7 @@
 import mysql.connector
 import config
 import gspread
-from google.auth import service_account
+from google.oauth2 import service_account
 from email.mime.text import MIMEText
 import smtplib
 
