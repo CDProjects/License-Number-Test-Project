@@ -1,7 +1,7 @@
 import mysql.connector
 import config
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+from google.auth import service_account
 from email.mime.text import MIMEText
 import smtplib
 
@@ -34,7 +34,7 @@ prefixed_license_numbers_retired_table = ['B' + str(row[0]) for row in license_n
 
 # Get Google Sheets credentials and connect to sheet
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-creds = ServiceAccountCredentials.from_json_keyfile_name('Keys/Google Sheets API.json', scope)
+credentials = service_account.Credentials.from_service_account_file('Keys/Google Sheets API.json', scopes=scope)
 client = gspread.authorize(creds)
 sheet = client.open('MySQL Test Table').sheet1
 
