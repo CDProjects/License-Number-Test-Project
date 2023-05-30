@@ -41,24 +41,16 @@ sheet = client.open('MySQL Test Table').sheet1
 # Get all license numbers from the Google Sheet
 sheet_license_numbers = [row[0] for row in sheet.get_all_values()][1:]
 
-# Prefix the license numbers in the Google Sheet with 'A' or 'B' if they are not already prefixed
-prefixed_sheet_license_numbers = []
-for license_number in sheet_license_numbers:
-    if license_number[0] == 'A' or license_number[0] == 'B':
-        prefixed_sheet_license_numbers.append(license_number)
-    else:
-        prefixed_sheet_license_numbers.append('A' + license_number)
-
 # Create sets of the license numbers from each source
 license_numbers_license_table = set(prefixed_license_numbers_license_table)
 license_numbers_retired_table = set(prefixed_license_numbers_retired_table)
-sheet_license_numbers = set(prefixed_sheet_license_numbers)
+sheet_license_numbers = set(sheet_license_numbers)
 
 # Find missing license numbers in the license_numbers_license_table
-missing_license_numbers_license_table = license_numbers_license_table - sheet_license_numbers
+missing_license_numbers_license_table = sheet_license_numbers - license_numbers_license_table
 
 # Find missing license numbers in the license_numbers_retired_table
-missing_license_numbers_retired_table = license_numbers_retired_table - sheet_license_numbers
+missing_license_numbers_retired_table = sheet_license_numbers - license_numbers_retired_table
 
 # Combine the missing license numbers from both tables
 missing_license_numbers = missing_license_numbers_license_table.union(missing_license_numbers_retired_table)
@@ -90,4 +82,3 @@ with smtplib.SMTP('smtp.gmail.com', 587, timeout=120) as smtpObj:
     smtpObj.sendmail(sender, recipient, message.as_string())
 
     # Close the connection to the SMTP server
-    smtpObj.quit()
